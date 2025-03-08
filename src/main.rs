@@ -1,8 +1,39 @@
 use eframe::egui;
+use serde::Deserialize;
+use std::{env, fs};
+use std::path::{Path, PathBuf};
+
+#[derive(Debug, Deserialize)]
+struct ConfigEntry {
+    name: String,
+    command: String,
+    comment: String,
+    integer: i32,
+}
+
+#[derive(Debug, Deserialize)]
+struct Config {
+    entries: Vec<ConfigEntry>,
+}
 
 struct MyApp {
     buttons: [String; 4],
     clicks: [u32; 4],
+}
+
+fn get_config() -> Config {
+    // Read the .toml file into a string
+    let home: PathBuf = env::home_dir().unwrap();
+    //assert_eq!(home.is_some(), true);
+
+    let file_path = Path::new(home.as_path()).join(".local/share/browser-witch/config.toml");
+    println!("Path: {}", file_path.as_path().display());
+    let toml_content = fs::read_to_string(file_path).expect("Failed to read file");
+
+    // Deserialize the string into the Config struct
+    let config: Config = toml::from_str(&toml_content).expect("Failed to parse TOML");
+
+    return config;
 }
 
 impl Default for MyApp {
@@ -37,6 +68,10 @@ impl eframe::App for MyApp {
 }
 
 fn main() -> eframe::Result<()> {
+    let config = get_config();
+    // Print the loaded configuration
+    println!("{:#?}", config);
+
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_always_on_top()
