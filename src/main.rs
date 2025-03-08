@@ -17,8 +17,8 @@ struct Config {
 }
 
 struct MyApp {
-    buttons: [String; 4],
-    clicks: [u32; 4],
+    buttons: Vec<String>,
+    clicks: Vec<i32>,
 }
 
 fn get_config() -> Config {
@@ -39,13 +39,11 @@ fn get_config() -> Config {
 impl Default for MyApp {
     fn default() -> Self {
         Self {
-            buttons: [
+            buttons: vec![
                 String::from("Button 1"),
                 String::from("Button 2"),
-                String::from("Button 3"),
-                String::from("Button 4"),
             ],
-            clicks: [0, 0, 0, 0],
+            clicks: vec![0; 2],
         }
     }
 }
@@ -57,7 +55,7 @@ impl eframe::App for MyApp {
 
             ui.add_space(20.0);
 
-            for index in [0, 1, 2, 3] {
+            for index in 0..self.clicks.len() {
                 if ui.button(self.buttons[index].clone()).clicked() {
                     self.clicks[index] += 1;
                     println!("{} was clicked! Total clicks: {}", self.buttons[index], self.clicks[index]);
