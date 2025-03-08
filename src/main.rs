@@ -48,11 +48,22 @@ impl AppData {
         }
     }
     fn from_config(config: Config) -> Self {
-        let mut buttons_from_config: Vec<String> = Vec::new();
-        let mut clicks_from_config: Vec<i32> = Vec::new();
+        let mut integers: Vec<i32> = Vec::new();
         for entry in config.entries.iter() {
-            buttons_from_config.push(entry.name.clone());
-            clicks_from_config.push(0);
+            integers.push(entry.integer);
+        }
+        integers.sort();
+        let pre_dedup_length = integers.len();
+        integers.dedup();
+        assert_eq!(pre_dedup_length, integers.len());
+        let mut buttons_from_config: Vec<String> = vec!["".to_string(); integers.len()];
+        let mut clicks_from_config: Vec<i32> = vec![0; integers.len()];
+        for entry in config.entries.iter() {
+            for (index, integer) in integers.iter().enumerate() {
+                if *integer == entry.integer {
+                    buttons_from_config[index] = entry.name.clone();
+                }
+            }
         }
         Self {
             buttons: buttons_from_config,
@@ -73,6 +84,7 @@ impl eframe::App for AppData {
                     self.clicks[index] += 1;
                     println!("{} was clicked! Total clicks: {}", self.buttons[index], self.clicks[index]);
                 }
+                // TODO: print comment
             }
         });
     }
