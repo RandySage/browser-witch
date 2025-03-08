@@ -1,0 +1,11 @@
+[[entries]]
+name = "Entry1"
+command = "cmd1"
+comment = "This is the first entry"
+integer = 42
+
+[[entries]]
+name = "Entry2"
+command = "cmd2"
+comment = "This is the second entry"
+integer = 99
