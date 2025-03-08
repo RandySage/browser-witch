@@ -16,7 +16,7 @@ struct Config {
     entries: Vec<ConfigEntry>,
 }
 
-struct MyApp {
+struct AppData {
     buttons: Vec<String>,
     clicks: Vec<i32>,
 }
@@ -36,7 +36,8 @@ fn get_config() -> Config {
     return config;
 }
 
-impl Default for MyApp {
+
+impl AppData {
     fn default() -> Self {
         Self {
             buttons: vec![
@@ -46,9 +47,21 @@ impl Default for MyApp {
             clicks: vec![0; 2],
         }
     }
+    fn from_config(config: Config) -> Self {
+        let mut buttons_from_config: Vec<String> = Vec::new();
+        let mut clicks_from_config: Vec<i32> = Vec::new();
+        for entry in config.entries.iter() {
+            buttons_from_config.push(entry.name.clone());
+            clicks_from_config.push(0);
+        }
+        Self {
+            buttons: buttons_from_config,
+            clicks: clicks_from_config,
+        }
+    }
 }
 
-impl eframe::App for MyApp {
+impl eframe::App for AppData {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Four Button Example");
@@ -69,6 +82,7 @@ fn main() -> eframe::Result<()> {
     let config = get_config();
     // Print the loaded configuration
     println!("{:#?}", config);
+    let config_app_data = AppData::from_config(config);
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
@@ -83,7 +97,7 @@ fn main() -> eframe::Result<()> {
         Box::new(|_context| {
             //egui_extras::install_image_loaders(&context.egui_ctx);
             Ok(Box::new(
-                MyApp::default()
+                config_app_data
             ))
         }),
     )
