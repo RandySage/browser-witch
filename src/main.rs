@@ -64,7 +64,7 @@ impl AppData {
 impl eframe::App for AppData {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Four Button Example");
+            ui.heading("Browser Witch");
 
             ui.add_space(20.0);
 
@@ -92,7 +92,7 @@ fn main() -> eframe::Result<()> {
     };
 
     eframe::run_native(
-        "Four Button App",
+        "Browser Witch",
         options,
         Box::new(|_context| {
             //egui_extras::install_image_loaders(&context.egui_ctx);
