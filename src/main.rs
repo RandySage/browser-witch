@@ -60,7 +60,6 @@ impl AppData {
             sort_integers.push(entry.sort);
         }
         sort_integers.sort();
-        let pre_dedup_length = sort_integers.len();
         let mut dedup_integers: Vec<i32> = sort_integers.clone();
         dedup_integers.dedup();
         if sort_integers.len() != dedup_integers.len() {
