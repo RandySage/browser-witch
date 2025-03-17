@@ -35,18 +35,25 @@ fn get_config() -> Config {
     return config;
 }
 
+fn get_stdin() -> std::string::String {
+
+    let args: Vec<String> = env::args().collect();
+    if args.len() == 2 {  // Expecting exactly one input
+        // Process the first argument after the program name
+        let input = &args[1];
+        println!("Received link, {}", input);
+        return input.to_string();
+    } else {
+        println!("Error:2~No arguments provided.\nUsage:\n\tbrowser_witch <url>");
+        process::exit(1);
+    }
+    return String::from("");
+}
+
 
 impl AppData {
-    fn default() -> Self {
-        Self {
-            buttons: vec![
-                String::from("Button 1"),
-                String::from("Button 2"),
-            ],
-            clicks: vec![0; 2],
-        }
-    }
-    fn from_config(config: Config) -> Self {
+    fn from_config(config: Config, command_input: &str) -> Self {
+        println!("TODO: implement command_input handling for '{}'", command_input);
         let mut sort_integers: Vec<i32> = Vec::new();
         for entry in config.entries.iter() {
             sort_integers.push(entry.sort);
@@ -95,10 +102,12 @@ impl eframe::App for AppData {
 }
 
 fn main() -> eframe::Result<()> {
+    let command_str: String = get_stdin();
+
     let config = get_config();
     // Print the loaded configuration
     println!("{:#?}", config);
-    let config_app_data = AppData::from_config(config);
+    let config_app_data = AppData::from_config(config, &command_str);
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
