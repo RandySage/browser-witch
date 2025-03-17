@@ -79,12 +79,18 @@ impl AppData {
         Self {
             buttons: buttons_from_config,
             clicks: clicks_from_config,
+            command: command_input,
         }
     }
 }
 
 impl eframe::App for AppData {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        // Check for Ctrl+Q
+        if ctx.input(|i| i.modifiers.ctrl && i.key_pressed(egui::Key::Q)) {
+            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+        }
+
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Browser Witch");
 
