@@ -1,14 +1,13 @@
 use eframe::egui;
 use serde::Deserialize;
-use std::{env, fs};
+use std::{env, fs, process};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Deserialize)]
 struct ConfigEntry {
     name: String,
     command: String,
-    comment: String,
-    integer: i32,
+    sort: i32,
 }
 
 #[derive(Debug, Deserialize)]
@@ -48,19 +47,24 @@ impl AppData {
         }
     }
     fn from_config(config: Config) -> Self {
-        let mut integers: Vec<i32> = Vec::new();
+        let mut sort_integers: Vec<i32> = Vec::new();
         for entry in config.entries.iter() {
-            integers.push(entry.integer);
+            sort_integers.push(entry.sort);
         }
-        integers.sort();
-        let pre_dedup_length = integers.len();
-        integers.dedup();
-        assert_eq!(pre_dedup_length, integers.len());
-        let mut buttons_from_config: Vec<String> = vec!["".to_string(); integers.len()];
-        let mut clicks_from_config: Vec<i32> = vec![0; integers.len()];
+        sort_integers.sort();
+        let pre_dedup_length = sort_integers.len();
+        let mut dedup_integers: Vec<i32> = sort_integers.clone();
+        dedup_integers.dedup();
+        if sort_integers.len() != dedup_integers.len() {
+            println!("Error: a sort index is repeated: {:#?}", sort_integers);
+            println!("Aborting");
+            process::exit(1);
+        }
+        let mut buttons_from_config: Vec<String> = vec!["".to_string(); sort_integers.len()];
+        let clicks_from_config: Vec<i32> = vec![0; sort_integers.len()];
         for entry in config.entries.iter() {
-            for (index, integer) in integers.iter().enumerate() {
-                if *integer == entry.integer {
+            for (index, sort) in sort_integers.iter().enumerate() {
+                if *sort == entry.sort {
                     buttons_from_config[index] = entry.name.clone();
                 }
             }
