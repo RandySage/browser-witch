@@ -1,3 +1,4 @@
+use clap::Parser;
 use eframe::egui;
 use serde::Deserialize;
 use std::{env, fs, process};
@@ -20,6 +21,22 @@ struct AppData {
     clicks: Vec<i32>,
 }
 
+// Define your CLI structure
+#[derive(Parser)]
+#[command(name = "browser_witch")]
+#[command(author = "Randy")]
+#[command(version = "0.1.0")]
+#[command(about = "Launch a URL with a selectable browser", long_about = None)]
+struct Cli {
+    // Define a positional argument
+    #[arg(help = "URL to open")]
+    url: String,
+
+    // Define a flag
+    #[arg(short, long, help = "Enable verbose mode")]
+    verbose: bool,
+}
+
 fn get_config() -> Config {
     // Read the .toml file into a string
     let home: PathBuf = env::home_dir().unwrap();
@@ -34,22 +51,6 @@ fn get_config() -> Config {
 
     return config;
 }
-
-fn get_stdin() -> std::string::String {
-
-    let args: Vec<String> = env::args().collect();
-    if args.len() == 2 {  // Expecting exactly one input
-        // Process the first argument after the program name
-        let input = &args[1];
-        println!("Received link, {}", input);
-        return input.to_string();
-    } else {
-        println!("Error:2~No arguments provided.\nUsage:\n\tbrowser_witch <url>");
-        process::exit(1);
-    }
-    return String::from("");
-}
-
 
 impl AppData {
     fn from_config(config: Config, command_input: &str) -> Self {
@@ -108,12 +109,14 @@ impl eframe::App for AppData {
 }
 
 fn main() -> eframe::Result<()> {
-    let command_str: String = get_stdin();
+    let cli = Cli::parse();
 
     let config = get_config();
     // Print the loaded configuration
-    println!("{:#?}", config);
-    let config_app_data = AppData::from_config(config, &command_str);
+    if cli.verbose {
+        println!("{:#?}", config);
+    }
+    let config_app_data = AppData::from_config(config, &cli.url);
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
