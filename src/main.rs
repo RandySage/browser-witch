@@ -107,24 +107,17 @@ fn open_url(cmd_string: &str, url: &str) -> Result<(), String> {
         } else {
             replaced_parts.push(part.to_string());
         }
-        println!("{}", replaced_parts[replaced_parts.len() - 1]);
     }
 
     let command = &replaced_parts[0];
     let args = &replaced_parts[1..];
 
-    let output = Command::new(command)
+    Command::new(command)
         .args(args)
-        .output()
+        .spawn()
         .map_err(|e| format!("Failed to execute command: {}", e))?;
 
-    if output.status.success() {
-        println!("Command executed successfully");
-        Ok(())
-    } else {
-        let error = String::from_utf8_lossy(&output.stderr);
-        Err(format!("Command failed: {}", error))
-    }
+    Ok(())
 }
 
 
