@@ -153,7 +153,6 @@ impl eframe::App for AppData {
                             eprintln!("Error: {}", e);
                             process::exit(1);
                         }
-                        unreachable!("Unexpected return type from open_url")
                     }
                 }
             }
