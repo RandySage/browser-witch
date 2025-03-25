@@ -139,7 +139,7 @@ impl eframe::App for AppData {
 
             for index in 0..self.config_items.len() {
                 let text = egui::RichText::new(self.config_items[index].name.clone())
-                    .size(24.0);
+                    .size(36.0);
                 if ui.button(text).clicked() {
                     println!("{} clicked", self.config_items[index].name);
                     let config_command = self.config_items[index].command.clone();
