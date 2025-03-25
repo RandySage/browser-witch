@@ -1,8 +1,12 @@
 use clap::Parser;
+use directories::ProjectDirs;
 use eframe::egui;
 use serde::Deserialize;
-use std::{env, fs, process};
-use std::path::{Path, PathBuf};
+use std::{fs, process};
+
+const COMMVENT_ORG_QUALIFIER: &str = "org.commvent";
+const COMMVENT: &str = "CommVent";
+const BROWSER_WITCH: &str = "Browser Witch";
 
 #[derive(Debug, Deserialize)]
 struct ConfigEntry {
@@ -39,17 +43,19 @@ struct Cli {
 
 fn get_config() -> Config {
     // Read the .toml file into a string
-    let home: PathBuf = env::home_dir().unwrap();
-    //assert_eq!(home.is_some(), true);
+    if let Some(proj_dirs) = ProjectDirs::from(COMMVENT_ORG_QUALIFIER, COMMVENT,  BROWSER_WITCH) {
+        let file_path = proj_dirs.config_dir().join("config.toml");
+        println!("{} config path: {}", BROWSER_WITCH, file_path.as_path().display());
+        let toml_content = fs::read_to_string(file_path).expect("Failed to read file");
 
-    let file_path = Path::new(home.as_path()).join(".local/share/browser-witch/config.toml");
-    println!("Path: {}", file_path.as_path().display());
-    let toml_content = fs::read_to_string(file_path).expect("Failed to read file");
+        // Deserialize the string into the Config struct
+        let config: Config = toml::from_str(&toml_content).expect("Failed to parse TOML");
 
-    // Deserialize the string into the Config struct
-    let config: Config = toml::from_str(&toml_content).expect("Failed to parse TOML");
-
-    return config;
+        return config;
+    } else {
+        println!("Error: failed to construct config directory path; aborting");
+        process::exit(1);
+    }
 }
 
 impl AppData {
@@ -92,7 +98,7 @@ impl eframe::App for AppData {
         }
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Browser Witch");
+            ui.heading(BROWSER_WITCH);
 
             ui.add_space(20.0);
 
@@ -125,7 +131,7 @@ fn main() -> eframe::Result<()> {
     };
 
     eframe::run_native(
-        "Browser Witch",
+        BROWSER_WITCH,
         options,
         Box::new(|_context| {
             //egui_extras::install_image_loaders(&context.egui_ctx);
