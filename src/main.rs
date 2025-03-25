@@ -1,8 +1,11 @@
+// TODO:
+//  1. handle whitespace in paths in config files
 use clap::Parser;
 use directories::ProjectDirs;
 use eframe::egui;
 use serde::Deserialize;
 use std::{fs, process};
+use std::process::Command;
 
 const COMMVENT_ORG_QUALIFIER: &str = "org.commvent";
 const COMMVENT: &str = "CommVent";
@@ -22,6 +25,7 @@ struct Config {
 
 struct AppData {
     config_items: Vec<ConfigEntry>,
+    url: String,
 }
 
 // Define your CLI structure
@@ -58,8 +62,7 @@ fn get_config() -> Config {
 }
 
 impl AppData {
-    fn from_config(config: Config, command_input: &str) -> Self {
-        println!("TODO: implement command_input handling for '{}'", command_input);
+    fn from_config(config: Config, url: &str) -> Self {
         let mut sort_integers: Vec<i32> = Vec::new();
         for entry in config.entries.iter() {
             sort_integers.push(entry.sort);
@@ -81,10 +84,46 @@ impl AppData {
             }
         }
         Self {
-            config_items: sort_config_items
+            config_items: sort_config_items,
+            url: url.to_string(),
         }
     }
 }
+
+fn open_url(cmd_string: &str, url: &str) -> Result<(), String> {
+    // Split the string by whitespace
+    let parts: Vec<&str> = cmd_string.split_whitespace().collect();
+
+    if parts.is_empty() {
+        return Err("Empty command string".to_string());
+    }
+    let mut replaced_parts: Vec<String> = Vec::with_capacity(parts.len());
+    for part in parts {
+        if part == "{url}" {
+            replaced_parts.push(url.to_string());
+        } else {
+            replaced_parts.push(part.to_string());
+        }
+        println!("{}", replaced_parts[replaced_parts.len() - 1]);
+    }
+
+    let command = &replaced_parts[0];
+    let args = &replaced_parts[1..];
+
+    let output = Command::new(command)
+        .args(args)
+        .output()
+        .map_err(|e| format!("Failed to execute command: {}", e))?;
+
+    if output.status.success() {
+        println!("Command executed successfully");
+        Ok(())
+    } else {
+        let error = String::from_utf8_lossy(&output.stderr);
+        Err(format!("Command failed: {}", error))
+    }
+}
+
 
 impl eframe::App for AppData {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
@@ -103,7 +142,19 @@ impl eframe::App for AppData {
                     .size(24.0);
                 if ui.button(text).clicked() {
                     println!("{} clicked", self.config_items[index].name);
-                    println!("{}", self.config_items[index].command);
+                    let config_command = self.config_items[index].command.clone();
+                    println!("{}, url={}", config_command, self.url);
+                    match open_url(&config_command, &self.url) {
+                        Ok(_) => {
+                            println!("Command completed");
+                            process::exit(0);
+                        }
+                        Err(e) => {
+                            eprintln!("Error: {}", e);
+                            process::exit(1);
+                        }
+                        unreachable!("Unexpected return type from open_url")
+                    }
                 }
             }
         });
