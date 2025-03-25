@@ -22,7 +22,6 @@ struct Config {
 
 struct AppData {
     buttons: Vec<String>,
-    clicks: Vec<i32>,
 }
 
 // Define your CLI structure
@@ -74,7 +73,6 @@ impl AppData {
             process::exit(1);
         }
         let mut buttons_from_config: Vec<String> = vec!["".to_string(); sort_integers.len()];
-        let clicks_from_config: Vec<i32> = vec![0; sort_integers.len()];
         for entry in config.entries.iter() {
             for (index, sort) in sort_integers.iter().enumerate() {
                 if *sort == entry.sort {
@@ -84,8 +82,6 @@ impl AppData {
         }
         Self {
             buttons: buttons_from_config,
-            clicks: clicks_from_config,
-            command: command_input,
         }
     }
 }
@@ -102,10 +98,9 @@ impl eframe::App for AppData {
 
             ui.add_space(20.0);
 
-            for index in 0..self.clicks.len() {
+            for index in 0..self.buttons.len() {
                 if ui.button(self.buttons[index].clone()).clicked() {
-                    self.clicks[index] += 1;
-                    println!("{} was clicked! Total clicks: {}", self.buttons[index], self.clicks[index]);
+                    println!("{}", self.buttons[index]);
                 }
                 // TODO: print comment
             }
