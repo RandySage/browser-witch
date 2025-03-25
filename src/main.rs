@@ -8,7 +8,7 @@ const COMMVENT_ORG_QUALIFIER: &str = "org.commvent";
 const COMMVENT: &str = "CommVent";
 const BROWSER_WITCH: &str = "Browser Witch";
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 struct ConfigEntry {
     name: String,
     command: String,
@@ -21,7 +21,7 @@ struct Config {
 }
 
 struct AppData {
-    buttons: Vec<String>,
+    config_items: Vec<ConfigEntry>,
 }
 
 // Define your CLI structure
@@ -72,16 +72,16 @@ impl AppData {
             println!("Aborting");
             process::exit(1);
         }
-        let mut buttons_from_config: Vec<String> = vec!["".to_string(); sort_integers.len()];
+        let mut sort_config_items: Vec<ConfigEntry> = vec![ConfigEntry { name: "".to_string(), command: "".to_string(), sort: 0 }; sort_integers.len()];
         for entry in config.entries.iter() {
             for (index, sort) in sort_integers.iter().enumerate() {
                 if *sort == entry.sort {
-                    buttons_from_config[index] = entry.name.clone();
+                    sort_config_items[index] = entry.clone();
                 }
             }
         }
         Self {
-            buttons: buttons_from_config,
+            config_items: sort_config_items
         }
     }
 }
@@ -98,11 +98,13 @@ impl eframe::App for AppData {
 
             ui.add_space(20.0);
 
-            for index in 0..self.buttons.len() {
-                if ui.button(self.buttons[index].clone()).clicked() {
-                    println!("{}", self.buttons[index]);
+            for index in 0..self.config_items.len() {
+                let text = egui::RichText::new(self.config_items[index].name.clone())
+                    .size(24.0);
+                if ui.button(text).clicked() {
+                    println!("{} clicked", self.config_items[index].name);
+                    println!("{}", self.config_items[index].command);
                 }
-                // TODO: print comment
             }
         });
     }
