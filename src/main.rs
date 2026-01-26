@@ -1,9 +1,11 @@
 use clap::Parser;
 use directories::ProjectDirs;
 use eframe::egui;
+use log::info;
 use serde::Deserialize;
 use std::{fs, process};
 use std::process::Command;
+use systemd_journal_logger::JournalLog;
 
 const COMMVENT_ORG_QUALIFIER: &str = "org.commvent";
 const COMMVENT: &str = "CommVent";
@@ -135,6 +137,8 @@ impl eframe::App for AppData {
                     println!("{} clicked", self.config_items[index].name);
                     let config_command = self.config_items[index].command.clone();
                     println!("{}, url={}", config_command, self.url);
+                    info!("browser-witch selected: {} command: {} url: {}",
+                          self.config_items[index].name, config_command, self.url);
                     match open_url(&config_command, &self.url) {
                         Ok(_) => {
                             println!("Command completed");
@@ -152,7 +156,18 @@ impl eframe::App for AppData {
 }
 
 fn main() -> eframe::Result<()> {
+    // Disable XIM to prevent hangs when input method daemon isn't responding
+    std::env::remove_var("XMODIFIERS");
+
+    // Initialize journal logging
+    JournalLog::new()
+        .unwrap()
+        .install()
+        .unwrap();
+    log::set_max_level(log::LevelFilter::Info);
+
     let cli = Cli::parse();
+    info!("browser-witch started with url: {}", cli.url);
 
     let config = get_config();
     // Print the loaded configuration
