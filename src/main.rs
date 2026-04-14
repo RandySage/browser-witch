@@ -3,7 +3,9 @@ use directories::ProjectDirs;
 use gtk4::gdk;
 use gtk4::glib;
 use gtk4::prelude::*;
-use gtk4::{Application, ApplicationWindow, Box as GtkBox, Button, CssProvider, Label, Orientation};
+use gtk4::{
+    Application, ApplicationWindow, Box as GtkBox, Button, CssProvider, Label, Orientation,
+};
 use log::info;
 use serde::Deserialize;
 use std::process::Command;
@@ -72,7 +74,13 @@ fn open_url(cmd_string: &str, url: &str) -> Result<(), String> {
     }
     let replaced: Vec<String> = parts
         .iter()
-        .map(|p| if *p == "{url}" { url.to_string() } else { p.to_string() })
+        .map(|p| {
+            if *p == "{url}" {
+                url.to_string()
+            } else {
+                p.to_string()
+            }
+        })
         .collect();
 
     Command::new(&replaced[0])
